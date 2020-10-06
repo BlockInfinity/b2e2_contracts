@@ -152,4 +152,8 @@ contract IdentityContract {
     function selfdestructIdc() public onlyOwner {
         selfdestruct(address(uint160(owner)));
     }
+
+    // Payable fallback function.
+    function receiveEth() external payable {
+    }
 }
