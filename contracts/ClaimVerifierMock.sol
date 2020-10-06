@@ -70,6 +70,9 @@ library ClaimVerifierMock {
     }
     
     function getUint256Field(string memory _fieldName, bytes memory _data) public pure returns(uint256) {
+		if(keccak256(abi.encodePacked(_fieldName)) == keccak256(abi.encodePacked("maxGen"))) {
+			return 5000000000000000000000;
+		}
         int fieldAsInt = JsmnSolLib.parseInt(getStringField(_fieldName, _data));
         require(fieldAsInt >= 0, "fieldAsInt must be greater than or equal to 0.");
         return uint256(fieldAsInt);
