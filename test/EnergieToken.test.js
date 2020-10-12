@@ -138,10 +138,12 @@ contract('EnergyToken', function(accounts) {
 	// Give claims to IDC 0.
 	const json = '{ "q": "ab", "expiryDate": "1895220001", "startDate": "1" }';
 	const data = web3.utils.toHex(json);
+    const jsonExistenceGeneration = '{ "type": "generation", "expiryDate": "1895220001", "startDate": "1" }';
+	const dataExistenceGeneration = web3.utils.toHex(jsonExistenceGeneration);
     const jsonMaxGen = '{ "maxGen": "300", "expiryDate": "1895220001", "startDate": "1"}';
     const dataMaxGen = web3.utils.toHex(jsonMaxGen);
 	await addClaim(idcs[0], 10050, balanceAuthority.options.address, data, "", account8Sk);
-	await addClaim(idcs[0], 10060, physicalAssetAuthority.options.address, data, "", account8Sk);
+	await addClaim(idcs[0], 10060, physicalAssetAuthority.options.address, dataExistenceGeneration, "", account8Sk);
 	await addClaim(idcs[0], 10070, physicalAssetAuthority.options.address, data, "", account8Sk);
 	await addClaim(idcs[0], 10080, physicalAssetAuthority.options.address, data, "", account8Sk);
 	await addClaim(idcs[0], 10040, meteringAuthority.options.address, data, "", account8Sk);
@@ -150,7 +152,7 @@ contract('EnergyToken', function(accounts) {
 	// Give claims to IDC 2.
 	await addClaim(idcs[2], 10040, meteringAuthority.options.address, data, "", account8Sk);
 	await addClaim(idcs[2], 10050, balanceAuthority.options.address, data, "", account8Sk);
-	await addClaim(idcs[2], 10060, physicalAssetAuthority.options.address, data, "", account8Sk);
+	await addClaim(idcs[2], 10060, physicalAssetAuthority.options.address, dataExistenceGeneration, "", account8Sk);
 	await addClaim(idcs[2], 10065, physicalAssetAuthority.options.address, dataMaxGen, "", account8Sk);
 
 	// Get token ID.
@@ -362,13 +364,6 @@ contract('EnergyToken', function(accounts) {
 	let jsonAcceptedDistributor = '{ "t": "t", "expiryDate": "1895220001", "startDate": "1", "address": "' + distributorWeb3.options.address.slice(2).toLowerCase() + '" }';
 	let dataAcceptedDistributor = web3.utils.toHex(jsonAcceptedDistributor);
 	await addClaim(distributorWeb3, 10120, balanceAuthority.options.address, dataAcceptedDistributor, "", account8Sk);
-
-	// Give the regular reception claims to the distributor.
-	let json = '{ "q": "ab", "expiryDate": "1895220001", "startDate": "1" }';
-	let data = web3.utils.toHex(json);
-	await addClaim(distributorWeb3, 10040, meteringAuthority.options.address, data, "", account8Sk);
-	await addClaim(distributorWeb3, 10050, balanceAuthority.options.address, data, "", account8Sk);
-	await addClaim(distributorWeb3, 10060, physicalAssetAuthority.options.address, data, "", account8Sk);
 
 	// Set balance period different from any other balance period in the tests.
 	let balancePeriod = 1737549001;
@@ -594,8 +589,10 @@ contract('EnergyToken', function(accounts) {
   it("keeps track of energy data.", async function() {
 	let json = '{ "q": "ab", "expiryDate": "1895220001", "startDate": "1" }';
 	let data = web3.utils.toHex(json);
+    const jsonExistenceGeneration = '{ "type": "generation", "expiryDate": "1895220001", "startDate": "1" }';
+	const dataExistenceGeneration = web3.utils.toHex(jsonExistenceGeneration);
 	await addClaim(idcs[2], 10050, balanceAuthority.options.address, data, "", account8Sk);
-	await addClaim(idcs[2], 10060, physicalAssetAuthority.options.address, data, "", account8Sk);
+	await addClaim(idcs[2], 10060, physicalAssetAuthority.options.address, dataExistenceGeneration, "", account8Sk);
 	await addClaim(idcs[2], 10070, physicalAssetAuthority.options.address, data, "", account8Sk);
 	await addClaim(idcs[2], 10080, physicalAssetAuthority.options.address, data, "", account8Sk);
 	await addClaim(idcs[2], 10040, meteringAuthority.options.address, data, "", account8Sk);
