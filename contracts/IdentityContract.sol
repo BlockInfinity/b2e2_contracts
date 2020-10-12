@@ -141,6 +141,6 @@ contract IdentityContract is IERC725, IERC735 {
     }
     
     // Payable fallback function.
-    function receiveEth() external payable {
+    function () external payable {
     }
 }

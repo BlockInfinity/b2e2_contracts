@@ -54,7 +54,7 @@ contract EnergyToken is ERC1155 {
         _;
     }
     
-    modifier onlyGenerationPlants(address _plant, uint64 _balancePeriod) {
+    modifier onlyGenerationPlants(address payable _plant, uint64 _balancePeriod) {
         require(ClaimVerifier.getClaimOfType(marketAuthority, _plant, ClaimCommons.ClaimType.BalanceClaim, _balancePeriod) != 0, "No valid claim of type BalanceClaim found.");
         require(ClaimVerifier.getClaimOfTypeWithMatchingField(marketAuthority, _plant, ClaimCommons.ClaimType.ExistenceClaim, "type", "generation", _balancePeriod) != 0, "No valid claim of type ExistenceClaim of type generation found.");
         require(ClaimVerifier.getClaimOfType(marketAuthority, _plant, ClaimCommons.ClaimType.GenerationTypeClaim, _balancePeriod) != 0, "No valid claim of type GenerationTypeClaim found.");
@@ -74,7 +74,7 @@ contract EnergyToken is ERC1155 {
     
     function mint(uint256 _id, address[] memory _to, uint256[] memory _quantities) public noReentrancy {
         // Token needs to be mintable.
-        (TokenKind tokenKind, uint64 balancePeriod, address generationPlant) = getTokenIdConstituents(_id);
+        (TokenKind tokenKind, uint64 balancePeriod, address payable generationPlant) = getTokenIdConstituents(_id);
         require(tokenKind == TokenKind.AbsoluteForward || tokenKind == TokenKind.ConsumptionBasedForward, "tokenKind must be AbsoluteForward or ConsumptionBasedForward.");
         
         // msg.sender needs to be allowed to mint.
@@ -158,7 +158,7 @@ contract EnergyToken is ERC1155 {
         energyDocumentations[_plant][_balancePeriod] = EnergyDocumentation(IdentityContract(msg.sender), _value, corrected, false, true);
     }
     
-    function addMeasuredEnergyGeneration(address _plant, uint256 _value, uint64 _balancePeriod) public onlyMeteringAuthorities onlyGenerationPlants(_plant, Commons.getBalancePeriod(marketAuthority.balancePeriodLength(), now)) noReentrancy {
+    function addMeasuredEnergyGeneration(address payable _plant, uint256 _value, uint64 _balancePeriod) public onlyMeteringAuthorities onlyGenerationPlants(_plant, Commons.getBalancePeriod(marketAuthority.balancePeriodLength(), now)) noReentrancy {
         bool corrected = false;
         // Recognize corrected energy documentations.
         if(energyDocumentations[_plant][_balancePeriod].entered) {
@@ -195,7 +195,7 @@ contract EnergyToken is ERC1155 {
         }
     }
     
-    function addMeasuredEnergyGeneration_capabilityCheck(address _plant, uint256 _value) internal view {
+    function addMeasuredEnergyGeneration_capabilityCheck(address payable _plant, uint256 _value) internal view {
         uint256 maxGen = getPlantGenerationCapability(_plant);
         require(_value * 3600 <= maxGen * marketAuthority.balancePeriodLength() * 1000 * 10**18, "Attempt of documenting a value above plant's capability.");
     }
@@ -255,7 +255,7 @@ contract EnergyToken is ERC1155 {
         __tokenId += uint256(_identityContractAddress);
     }
     
-    function getTokenIdConstituents(uint256 _tokenId) public pure returns(TokenKind __tokenKind, uint64 __balancePeriod, address __identityContractAddress) {
+    function getTokenIdConstituents(uint256 _tokenId) public pure returns(TokenKind __tokenKind, uint64 __balancePeriod, address payable __identityContractAddress) {
         __identityContractAddress = address(uint160(_tokenId));
         __balancePeriod = uint64(_tokenId >> 160);
         __tokenKind = number2TokenKind(uint8(_tokenId >> (160 + 64)));
@@ -329,7 +329,7 @@ contract EnergyToken is ERC1155 {
         numberOfRelevantConsumptionPlantsUnmeasuredForGenerationPlant[_balancePeriod][_generationPlant]++; // not gonna overflow
     }
     
-    function getPlantGenerationCapability(address _plant) internal view returns (uint256 __maxGen) {
+    function getPlantGenerationCapability(address payable _plant) internal view returns (uint256 __maxGen) {
         uint256 maxPowerGenerationClaimId = ClaimVerifier.getClaimOfType(marketAuthority, _plant, ClaimCommons.ClaimType.MaxPowerGenerationClaim);
         (, , , , bytes memory claimData, ) = IdentityContract(_plant).getClaim(maxPowerGenerationClaimId);
         __maxGen = ClaimVerifier.getUint256Field("maxGen", claimData);

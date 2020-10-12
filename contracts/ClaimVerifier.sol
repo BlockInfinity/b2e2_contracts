@@ -15,9 +15,10 @@ library ClaimVerifier {
     /**
      * Iff _requiredValidAt is not zero, only claims that are not expired at that time and are already valid at that time are considered. If it is set to zero, no expiration or starting date check is performed.
      */
-    function verifyClaim(IdentityContract marketAuthority, address _subject, uint256 _claimId, uint64 _requiredValidAt, bool allowFutureValidity) public view returns(bool __valid) {
-        (uint256 topic, uint256 scheme, address issuer, bytes memory signature, bytes memory data, ) = IdentityContract(_subject).getClaim(_claimId);
+    function verifyClaim(IdentityContract marketAuthority, address payable _subject, uint256 _claimId, uint64 _requiredValidAt, bool allowFutureValidity) public view returns(bool __valid) {
+        (uint256 topic, uint256 scheme, address issuerNonPayable, bytes memory signature, bytes memory data, ) = IdentityContract(_subject).getClaim(_claimId);
         ClaimCommons.ClaimType claimType = ClaimCommons.topic2ClaimType(topic);
+        address payable issuer = address(uint160(issuerNonPayable));
         
         if(_requiredValidAt != 0) {
             uint64 currentTime = Commons.getBalancePeriod(marketAuthority.balancePeriodLength(), _requiredValidAt);
@@ -36,7 +37,7 @@ library ClaimVerifier {
         require(false, "Claim verification failed because the claim type was not recognized.");
     }
     
-    function verifyClaim(IdentityContract marketAuthority, address _subject, uint256 _claimId) public view returns(bool __valid) {
+    function verifyClaim(IdentityContract marketAuthority, address payable _subject, uint256 _claimId) public view returns(bool __valid) {
         return verifyClaim(marketAuthority, _subject, _claimId, uint64(now), false);
     }
     
@@ -45,7 +46,7 @@ library ClaimVerifier {
      * 
      * Use this method before adding claims to make sure that only valid claims are added.
      */
-    function validateClaim(IdentityContract marketAuthority, ClaimCommons.ClaimType _claimType, address _subject, uint256 _topic, uint256 _scheme, address _issuer, bytes memory _signature, bytes memory _data) public view returns(bool) {
+    function validateClaim(IdentityContract marketAuthority, ClaimCommons.ClaimType _claimType, address _subject, uint256 _topic, uint256 _scheme, address payable _issuer, bytes memory _signature, bytes memory _data) public view returns(bool) {
         if(ClaimCommons.claimType2Topic(_claimType) != _topic)
             return false;
        
@@ -70,7 +71,7 @@ library ClaimVerifier {
      * 
      * Iff _requiredValidAt is not zero, only claims that are not expired at that time and are already valid at that time are considered. If it is set to zero, no expiration or startig date check is performed.
      */
-    function getClaimOfType(IdentityContract marketAuthority, address _subject, ClaimCommons.ClaimType _claimType, uint64 _requiredValidAt) public view returns (uint256 __claimId) {
+    function getClaimOfType(IdentityContract marketAuthority, address payable _subject, ClaimCommons.ClaimType _claimType, uint64 _requiredValidAt) public view returns (uint256 __claimId) {
         uint256 topic = ClaimCommons.claimType2Topic(_claimType);
         uint256[] memory claimIds = IdentityContract(_subject).getClaimIdsByTopic(topic);
         
@@ -89,11 +90,11 @@ library ClaimVerifier {
         return 0;
     }
     
-    function getClaimOfType(IdentityContract marketAuthority, address _subject, ClaimCommons.ClaimType _claimType) public view returns (uint256 __claimId) {
+    function getClaimOfType(IdentityContract marketAuthority, address payable _subject, ClaimCommons.ClaimType _claimType) public view returns (uint256 __claimId) {
         return getClaimOfType(marketAuthority, _subject, _claimType, Commons.getBalancePeriod(marketAuthority.balancePeriodLength(), now));
     }
     
-    function getClaimOfTypeByIssuer(IdentityContract marketAuthority, address _subject, ClaimCommons.ClaimType _claimType, address _issuer, uint64 _requiredValidAt) public view returns (uint256 __claimId) {
+    function getClaimOfTypeByIssuer(IdentityContract marketAuthority, address payable _subject, ClaimCommons.ClaimType _claimType, address _issuer, uint64 _requiredValidAt) public view returns (uint256 __claimId) {
         uint256 topic = ClaimCommons.claimType2Topic(_claimType);
         uint256 claimId = IdentityContractLib.getClaimId(_issuer, topic);
 
@@ -108,11 +109,11 @@ library ClaimVerifier {
         return claimId;
     }
     
-    function getClaimOfTypeByIssuer(IdentityContract marketAuthority, address _subject, ClaimCommons.ClaimType _claimType, address _issuer) public view returns (uint256 __claimId) {
+    function getClaimOfTypeByIssuer(IdentityContract marketAuthority, address payable _subject, ClaimCommons.ClaimType _claimType, address _issuer) public view returns (uint256 __claimId) {
         return getClaimOfTypeByIssuer(marketAuthority, _subject, _claimType, _issuer, Commons.getBalancePeriod(marketAuthority.balancePeriodLength(), now));
     }
     
-    function getClaimOfTypeWithMatchingField(IdentityContract marketAuthority, address _subject, ClaimCommons.ClaimType _claimType, string memory _fieldName, string memory _fieldContent, uint64 _requiredValidAt) public view returns (uint256 __claimId) {
+    function getClaimOfTypeWithMatchingField(IdentityContract marketAuthority, address payable _subject, ClaimCommons.ClaimType _claimType, string memory _fieldName, string memory _fieldContent, uint64 _requiredValidAt) public view returns (uint256 __claimId) {
         uint256 topic = ClaimCommons.claimType2Topic(_claimType);
         uint256[] memory claimIds = IdentityContract(_subject).getClaimIdsByTopic(topic);
         
@@ -175,7 +176,7 @@ library ClaimVerifier {
         return getUint64Field("startDate", _data);
     }
     
-    function verifySignature(address _subject, uint256 _topic, uint256 _scheme, address _issuer, bytes memory _signature, bytes memory _data) public view returns (bool __valid) {
+    function verifySignature(address _subject, uint256 _topic, uint256 _scheme, address payable _issuer, bytes memory _signature, bytes memory _data) public view returns (bool __valid) {
          // Check for currently unsupported signature.
         if(_scheme != ECDSA_SCHEME)
             return false;
