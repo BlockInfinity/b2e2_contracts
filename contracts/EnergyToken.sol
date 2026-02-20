@@ -37,7 +37,7 @@ contract EnergyToken is ERC1155, IEnergyToken, IERC165 {
     
     bool reentrancyLock;
     modifier noReentrancy {
-        require(!reentrancyLock);
+        require(!reentrancyLock, "reentrancy lock violation");
         reentrancyLock = true;
         _;
         reentrancyLock = false;
