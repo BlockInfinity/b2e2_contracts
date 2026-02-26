@@ -20,7 +20,8 @@
     "start-test-chain": "set -a && . ./.env && set +a && ./start_ganache_async.sh",
     "kill-test-chain": "kill $(ps aux | grep '[g]anache-cli' | awk '{print $2}')",
     "tests-on-running-chain": "set -a && . ./.env && set +a && npx truffle test --network development",
-    "compile-contracts": "npx truffle compile",
+    "compile-contracts": "npx truffle compile && npm run normalize-abis",
+    "normalize-abis": "node scripts/normalize-abis.js",
     "clean": "rm -rf ./build; rm -rf ./node_modules",
     "update-submodules": "git submodule update --recursive --init"
   },
